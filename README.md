@@ -19,5 +19,5 @@ A constraint satisfaction problem (CSP) solver for automatically creating a cour
 1. Clone this github repository.
 2. Run `npm install` and `npm run dev`.
 3. Open `localhost:5173` and view the schedule
-4. Play around with commenting out various classes in `mockData.ts`, and watch the schedule update in real time.
-5. Until I implement Anteater API, course info is manually added. To modify this info, visit `mockData.ts` and follow the existing structure. Visit [antalmanac.com](https://antalmanac.com/) for easy access to course information. Also, make sure to update the course color map (`colorMap`) in `solveCSP.ts`, and the course list (`courseNames`) in `App.tsx`.
+4. Play around with commenting out various classes in `src/app/mockData.ts`, and watch the schedule update in real time.
+5. Until I implement Anteater API, course info is manually added. To modify this info, visit `src/app/mockData.ts` and follow the existing structure. Visit [antalmanac.com](https://antalmanac.com/) for easy access to course information. Also, make sure to update the course color map (`colorMap`) in `src/app/solveCSP.ts`, and the course list (`courseNames`) in `src/app/App.tsx`.
