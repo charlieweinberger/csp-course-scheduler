@@ -1,11 +1,12 @@
-import { mockData } from "./mockData";
-import type { CourseEvent, CalendarEvent } from "./types";
+// import { mockData } from "./mockData";
+import { fetchData } from "./fetchData";
+import type { CourseEvent, CalendarEvent } from "../../types";
 
 const colorMap: { [name: string]: string } = {
   "COMPSCI 161": "blue",
   "COMPSCI 178": "red",
   "I&C SCI 139W": "green",
-  "I&C SCI 51": "purple"
+  "I&C SCI 51": "purple",
 };
 
 function getDateFromTime(day: string, timeOfDay: number): Date {
@@ -68,7 +69,7 @@ function isSectionCompatible(
 // Convert CourseEvent to CalendarEvent
 function convertToCalendarEvents(
   event: CourseEvent,
-  courseName: string,
+  courseName: string
 ): CalendarEvent[] {
   return event.days.map((day) => ({
     id: event.code,
@@ -79,8 +80,7 @@ function convertToCalendarEvents(
   }));
 }
 
-export default function solveCSP(courseNames: string[]) {
-
+function solveCSP(courseNames: string[]) {
   // Structure to hold our selected events
   type CourseSelection = {
     lecture: CourseEvent | null;
@@ -108,7 +108,8 @@ export default function solveCSP(courseNames: string[]) {
     }
 
     const courseName = courseNames[courseIndex];
-    const courseData = mockData[courseName];
+    // const courseData = mockData[courseName];
+    const courseData = fetchData(courseName);
 
     // Try to assign a lecture (must have one)
     const lectures = courseData[0];
@@ -349,4 +350,9 @@ export default function solveCSP(courseNames: string[]) {
   }
 
   return calendarEvents;
+}
+
+export default function getEvents(courseNames: string[], filter: boolean) {
+  if (filter) return solveCSP(courseNames);
+  return;
 }

@@ -1,40 +1,46 @@
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import { useState } from "react";
+import CalendarWrapper from "../components/calendar/calendar";
 
-import solveCSP from "./solveCSP";
-import type { CalendarEvent } from "./types";
-
-moment.updateLocale("en", { week: { dow: 1 } });
-const localizer = momentLocalizer(moment);
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 
 export default function App() {
-  const courseNames = ["COMPSCI 161", "COMPSCI 178", "I&C SCI 139W", "I&C SCI 51"];
-  const calendarEvents = solveCSP(courseNames);
+  const [courseDepartment, setCourseDepartment] = useState("");
+  const [courseNumber, setCourseNumber] = useState("");
+  const [courseNames, setCourseNames] = useState<string[]>([]);
 
   return (
-    <div style={{ height: "800px", padding: "20px" }}>
-      <Calendar<CalendarEvent>
-        localizer={localizer}
-        events={calendarEvents}
-        startAccessor="start"
-        endAccessor="end"
-        defaultView="week"
-        views={["week"]}
-        min={new Date(0, 0, 0, 7, 0)} // 7am
-        max={new Date(0, 0, 0, 23, 0)} // 11pm
-        eventPropGetter={(event: CalendarEvent) => {
-          return {
-            style: {
-              backgroundColor: event.color,
-              borderRadius: "5px",
-              color: "#fff",
-              border: "none",
-              display: "block",
-            },
-          };
-        }}
-      />
+    <div className="h-screen flex flex-col items-center justify-center gap-8">
+      <h1 className="text-4xl text-center font-bold">CSP Course Scheduler</h1>
+      <div className="flex gap-4">
+        <Input
+          type="text"
+          placeholder="Course Department"
+          value={courseDepartment}
+          onChange={(e) => setCourseDepartment(e.target.value)}
+        />
+        <Input
+          type="text"
+          placeholder="Course Number"
+          value={courseNumber}
+          onChange={(e) => setCourseNumber(e.target.value)}
+        />
+        <Button
+          onClick={() => {
+            console.log(`Adding course: ${courseDepartment} ${courseNumber}`);
+            setCourseNames([
+              ...courseNames,
+              `${courseDepartment} ${courseNumber}`,
+            ]);
+          }}
+        >
+          Add Course
+        </Button>
+      </div>
+      <div className="h-3/4 w-full flex justify-center gap-8">
+        <CalendarWrapper courseNames={courseNames} filter={true} />
+        <CalendarWrapper courseNames={courseNames} filter={false} />
+      </div>
     </div>
   );
 }
