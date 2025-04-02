@@ -7,6 +7,8 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 
 moment.updateLocale("en", { week: { dow: 1 } });
 
+// TODO remove space in calendar for all day events
+
 export default function CalendarWrapper({
   courseNames,
   filter,

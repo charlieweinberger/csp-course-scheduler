@@ -1,3 +1,5 @@
+// TODO delete this file
+
 // import type { CourseEvent } from "../../types";
 
 // interface MockDataType {

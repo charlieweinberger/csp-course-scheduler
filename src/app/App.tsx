@@ -9,6 +9,9 @@ export default function App() {
   const [courseNumber, setCourseNumber] = useState("");
   const [courseNames, setCourseNames] = useState<string[]>([]);
 
+  // TODO display current course list to user
+  // TODO add "generate schedule" button, and only generate a schedule when it's pressed
+
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-8">
       <h1 className="text-4xl text-center font-bold">CSP Course Scheduler</h1>

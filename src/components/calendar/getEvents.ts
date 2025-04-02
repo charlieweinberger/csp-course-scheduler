@@ -2,6 +2,7 @@
 import { fetchData } from "./fetchData";
 import type { CourseEvent, CalendarEvent } from "../../types";
 
+// TODO replace this with a random color generator
 const colorMap: { [name: string]: string } = {
   "COMPSCI 161": "blue",
   "COMPSCI 178": "red",
@@ -80,6 +81,7 @@ function convertToCalendarEvents(
   }));
 }
 
+// TODO dissect this function
 function solveCSP(courseNames: string[]) {
   // Structure to hold our selected events
   type CourseSelection = {
@@ -109,7 +111,7 @@ function solveCSP(courseNames: string[]) {
 
     const courseName = courseNames[courseIndex];
     // const courseData = mockData[courseName];
-    const courseData = fetchData(courseName);
+    const courseData = fetchData(courseName); // TODO make this async
 
     // Try to assign a lecture (must have one)
     const lectures = courseData[0];
@@ -354,5 +356,5 @@ function solveCSP(courseNames: string[]) {
 
 export default function getEvents(courseNames: string[], filter: boolean) {
   if (filter) return solveCSP(courseNames);
-  return;
+  return; // TODO implement the displayment of all courses
 }
