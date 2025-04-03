@@ -1,9 +1,14 @@
 // import { mockData } from "./mockData";
 import { fetchData } from "./fetchData";
-import type { color, colorMap, CourseEvent, CalendarEvent } from "../../types";
+import type {
+  color,
+  CourseEvent,
+  CalendarEvent,
+  CSPSelections,
+} from "../../types";
 
 const colors: color[] = ["red", "orange", "yellow", "green", "blue", "purple"];
-const usedColors: colorMap = {};
+const usedColors: { [courseName: string]: color } = {};
 
 function getDate(day: string, timeOfDay: number): Date {
   // Set monday to be starting day of the week
@@ -53,10 +58,11 @@ function randomColor(courseName: string): string {
   return randomColor;
 }
 
-function convertToCalendarEvents(
-  event: CourseEvent,
+function getCalendarEvent(
+  event: CourseEvent | null,
   courseName: string
-): CalendarEvent[] {
+): CalendarEvent[] | [] {
+  if (!event) return [];
   return event.days.map((day) => ({
     id: event.code,
     title: `${event.code}: ${event.type} ${event.section}`,
@@ -67,165 +73,75 @@ function convertToCalendarEvents(
 }
 
 // TODO dissect this function
-function solveCSP(courseNames: string[]) {
-  // Structure to hold our selected events
-  type CourseSelection = {
-    lecture: CourseEvent | null;
-    discussion: CourseEvent | null;
-    lab: CourseEvent | null;
-  };
+function backtrack(
+  courseNames: string[],
+  selections: CSPSelections,
+  selectedEvents: CourseEvent[],
+  courseIndex: number
+): boolean {
+  // Base case: all courses have been processed
+  if (courseIndex >= courseNames.length) {
+    return true;
+  }
 
-  const selections: { [courseName: string]: CourseSelection } = {};
-  const selectedEvents: CourseEvent[] = [];
+  const courseName = courseNames[courseIndex];
+  // const courseData = mockData[courseName];
+  const courseData = fetchData(courseName); // TODO make this async
 
-  // Initialize selections
-  courseNames.forEach((courseName) => {
-    selections[courseName] = {
-      lecture: null,
-      discussion: null,
-      lab: null,
-    };
-  });
+  // Try to assign a lecture (must have one)
+  const lectures = courseData[0];
+  if (lectures.length === 0) {
+    console.error(`No lectures available for ${courseName}`);
+    return false;
+  }
 
-  // Backtracking CSP solver function
-  function backtrack(courseIndex: number): boolean {
-    // Base case: all courses have been processed
-    if (courseIndex >= courseNames.length) {
-      return true;
+  for (const lecture of lectures) {
+    // Check if this lecture conflicts with any already selected events
+    if (
+      selectedEvents.some((selectedEvent) =>
+        eventsOverlap(lecture, selectedEvent)
+      )
+    ) {
+      continue;
     }
 
-    const courseName = courseNames[courseIndex];
-    // const courseData = mockData[courseName];
-    const courseData = fetchData(courseName); // TODO make this async
+    // Select this lecture
+    selections[courseName].lecture = lecture;
+    selectedEvents.push(lecture);
 
-    // Try to assign a lecture (must have one)
-    const lectures = courseData[0];
-    if (lectures.length === 0) {
-      console.error(`No lectures available for ${courseName}`);
-      return false;
-    }
+    // Try to assign a discussion if available
+    const discussions = courseData[1];
+    let discussionAssigned = discussions.length === 0; // True if no discussions to assign
 
-    for (const lecture of lectures) {
-      // Check if this lecture conflicts with any already selected events
-      if (
-        selectedEvents.some((selectedEvent) =>
-          eventsOverlap(lecture, selectedEvent)
-        )
-      ) {
+    if (!discussionAssigned) {
+      // Filter discussions to only those matching the lecture section
+      const compatibleDiscussions = discussions.filter((discussion) =>
+        sectionsCompatible(lecture.section, discussion.section)
+      );
+
+      if (compatibleDiscussions.length === 0) {
+        // No compatible discussions found, try another lecture
+        selectedEvents.pop();
+        selections[courseName].lecture = null;
         continue;
       }
 
-      // Select this lecture
-      selections[courseName].lecture = lecture;
-      selectedEvents.push(lecture);
+      let foundWorkingDiscussion = false;
 
-      // Try to assign a discussion if available
-      const discussions = courseData[1];
-      let discussionAssigned = discussions.length === 0; // True if no discussions to assign
-
-      if (!discussionAssigned) {
-        // Filter discussions to only those matching the lecture section
-        const compatibleDiscussions = discussions.filter((discussion) =>
-          sectionsCompatible(lecture.section, discussion.section)
-        );
-
-        if (compatibleDiscussions.length === 0) {
-          // No compatible discussions found, try another lecture
-          selectedEvents.pop();
-          selections[courseName].lecture = null;
+      for (const discussion of compatibleDiscussions) {
+        // Check for conflicts
+        if (
+          selectedEvents.some((selectedEvent) =>
+            eventsOverlap(discussion, selectedEvent)
+          )
+        ) {
           continue;
         }
 
-        let foundWorkingDiscussion = false;
-
-        for (const discussion of compatibleDiscussions) {
-          // Check for conflicts
-          if (
-            selectedEvents.some((selectedEvent) =>
-              eventsOverlap(discussion, selectedEvent)
-            )
-          ) {
-            continue;
-          }
-
-          // Select this discussion
-          selections[courseName].discussion = discussion;
-          selectedEvents.push(discussion);
-          discussionAssigned = true;
-
-          // Try to assign a lab if available
-          const labs = courseData[2];
-          const labAssigned = labs.length === 0; // True if no labs to assign
-
-          if (!labAssigned) {
-            // Filter labs to only those matching the lecture section
-            const compatibleLabs = labs.filter((lab) =>
-              sectionsCompatible(lecture.section, lab.section)
-            );
-
-            if (compatibleLabs.length === 0) {
-              // No compatible labs found, but since there are no labs in the data,
-              // this branch should never execute in the current example
-              selectedEvents.pop();
-              selections[courseName].discussion = null;
-              continue;
-            } else {
-              let foundCompatibleLab = false;
-
-              for (const lab of compatibleLabs) {
-                // Check for conflicts
-                if (
-                  selectedEvents.some((selectedEvent) =>
-                    eventsOverlap(lab, selectedEvent)
-                  )
-                ) {
-                  continue;
-                }
-
-                // Select this lab
-                selections[courseName].lab = lab;
-                selectedEvents.push(lab);
-                foundCompatibleLab = true;
-
-                // Try next course
-                if (backtrack(courseIndex + 1)) {
-                  return true;
-                }
-
-                // Backtrack lab selection
-                selectedEvents.pop();
-                selections[courseName].lab = null;
-              }
-
-              if (!foundCompatibleLab) {
-                // If no compatible lab was found, we need to try another discussion
-                selectedEvents.pop();
-                selections[courseName].discussion = null;
-                continue;
-              }
-            }
-          }
-
-          // If we're here, we either have no labs to assign, or we found a compatible lab that worked
-          // Try the next course
-          if (backtrack(courseIndex + 1)) {
-            foundWorkingDiscussion = true;
-            return true;
-          }
-
-          // If we get here, the current discussion didn't work with the rest of the schedule
-          selectedEvents.pop();
-          selections[courseName].discussion = null;
-        }
-
-        if (!foundWorkingDiscussion) {
-          // If no working discussion was found, we need to try another lecture
-          selectedEvents.pop();
-          selections[courseName].lecture = null;
-          continue;
-        }
-      } else {
-        // No discussions to assign
+        // Select this discussion
+        selections[courseName].discussion = discussion;
+        selectedEvents.push(discussion);
+        discussionAssigned = true;
 
         // Try to assign a lab if available
         const labs = courseData[2];
@@ -238,65 +154,163 @@ function solveCSP(courseNames: string[]) {
           );
 
           if (compatibleLabs.length === 0) {
-            // No compatible labs found, try another lecture
+            // No compatible labs found, but since there are no labs in the data,
+            // this branch should never execute in the current example
             selectedEvents.pop();
-            selections[courseName].lecture = null;
+            selections[courseName].discussion = null;
             continue;
-          }
+          } else {
+            let foundCompatibleLab = false;
 
-          let foundWorkingLab = false;
+            for (const lab of compatibleLabs) {
+              // Check for conflicts
+              if (
+                selectedEvents.some((selectedEvent) =>
+                  eventsOverlap(lab, selectedEvent)
+                )
+              ) {
+                continue;
+              }
 
-          for (const lab of compatibleLabs) {
-            // Check for conflicts
-            if (
-              selectedEvents.some((selectedEvent) =>
-                eventsOverlap(lab, selectedEvent)
-              )
-            ) {
+              // Select this lab
+              selections[courseName].lab = lab;
+              selectedEvents.push(lab);
+              foundCompatibleLab = true;
+
+              // Try next course
+              if (
+                backtrack(
+                  courseNames,
+                  selections,
+                  selectedEvents,
+                  courseIndex + 1
+                )
+              ) {
+                return true;
+              }
+
+              // Backtrack lab selection
+              selectedEvents.pop();
+              selections[courseName].lab = null;
+            }
+
+            if (!foundCompatibleLab) {
+              // If no compatible lab was found, we need to try another discussion
+              selectedEvents.pop();
+              selections[courseName].discussion = null;
               continue;
             }
-
-            // Select this lab
-            selections[courseName].lab = lab;
-            selectedEvents.push(lab);
-
-            // Try next course
-            if (backtrack(courseIndex + 1)) {
-              foundWorkingLab = true;
-              return true;
-            }
-
-            // Backtrack lab selection
-            selectedEvents.pop();
-            selections[courseName].lab = null;
           }
+        }
 
-          if (!foundWorkingLab) {
-            // If no working lab was found, we need to try another lecture
-            selectedEvents.pop();
-            selections[courseName].lecture = null;
+        // If we're here, we either have no labs to assign, or we found a compatible lab that worked
+        // Try the next course
+        if (
+          backtrack(courseNames, selections, selectedEvents, courseIndex + 1)
+        ) {
+          foundWorkingDiscussion = true;
+          return true;
+        }
+
+        // If we get here, the current discussion didn't work with the rest of the schedule
+        selectedEvents.pop();
+        selections[courseName].discussion = null;
+      }
+
+      if (!foundWorkingDiscussion) {
+        // If no working discussion was found, we need to try another lecture
+        selectedEvents.pop();
+        selections[courseName].lecture = null;
+        continue;
+      }
+    } else {
+      // No discussions to assign
+
+      // Try to assign a lab if available
+      const labs = courseData[2];
+      const labAssigned = labs.length === 0; // True if no labs to assign
+
+      if (!labAssigned) {
+        // Filter labs to only those matching the lecture section
+        const compatibleLabs = labs.filter((lab) =>
+          sectionsCompatible(lecture.section, lab.section)
+        );
+
+        if (compatibleLabs.length === 0) {
+          // No compatible labs found, try another lecture
+          selectedEvents.pop();
+          selections[courseName].lecture = null;
+          continue;
+        }
+
+        let foundWorkingLab = false;
+
+        for (const lab of compatibleLabs) {
+          // Check for conflicts
+          if (
+            selectedEvents.some((selectedEvent) =>
+              eventsOverlap(lab, selectedEvent)
+            )
+          ) {
             continue;
           }
-        } else {
-          // No labs to assign, try next course
-          if (backtrack(courseIndex + 1)) {
+
+          // Select this lab
+          selections[courseName].lab = lab;
+          selectedEvents.push(lab);
+
+          // Try next course
+          if (
+            backtrack(courseNames, selections, selectedEvents, courseIndex + 1)
+          ) {
+            foundWorkingLab = true;
             return true;
           }
 
-          // If we get here, the current lecture didn't work with the rest of the schedule
+          // Backtrack lab selection
+          selectedEvents.pop();
+          selections[courseName].lab = null;
+        }
+
+        if (!foundWorkingLab) {
+          // If no working lab was found, we need to try another lecture
           selectedEvents.pop();
           selections[courseName].lecture = null;
+          continue;
         }
+      } else {
+        // No labs to assign, try next course
+        if (
+          backtrack(courseNames, selections, selectedEvents, courseIndex + 1)
+        ) {
+          return true;
+        }
+
+        // If we get here, the current lecture didn't work with the rest of the schedule
+        selectedEvents.pop();
+        selections[courseName].lecture = null;
       }
     }
-
-    // No valid assignment for this course
-    return false;
   }
 
-  // Start the CSP solver
+  // No valid assignment for this course
+  return false;
+}
+
+function solveCSP(courseNames: string[]) {
+  const selections: CSPSelections = {};
+  const selectedEvents: CourseEvent[] = [];
+
+  courseNames.forEach((courseName) => {
+    selections[courseName] = {
+      lecture: null,
+      discussion: null,
+      lab: null,
+    };
+  });
+
   console.log("Starting CSP solver...");
-  const solutionFound = backtrack(0);
+  const solutionFound = backtrack(courseNames, selections, selectedEvents, 0);
 
   if (!solutionFound) {
     console.error(
@@ -306,34 +320,19 @@ function solveCSP(courseNames: string[]) {
   } else {
     console.log("Solution found!");
     console.log(
-      "Selected events:",
-      selectedEvents.map((e) => `${e.name} ${e.type} ${e.section}`)
+      `Selected events: ${selectedEvents.map(
+        (e) => `${e.name} ${e.type} ${e.section}`
+      )}`
     );
   }
 
-  // Convert selected events to calendar events
   const calendarEvents: CalendarEvent[] = [];
 
   for (const courseName of courseNames) {
     const selection = selections[courseName];
-
-    if (selection.lecture) {
-      calendarEvents.push(
-        ...convertToCalendarEvents(selection.lecture, courseName)
-      );
-    }
-
-    if (selection.discussion) {
-      calendarEvents.push(
-        ...convertToCalendarEvents(selection.discussion, courseName)
-      );
-    }
-
-    if (selection.lab) {
-      calendarEvents.push(
-        ...convertToCalendarEvents(selection.lab, courseName)
-      );
-    }
+    calendarEvents.push(...getCalendarEvent(selection.lecture, courseName));
+    calendarEvents.push(...getCalendarEvent(selection.discussion, courseName));
+    calendarEvents.push(...getCalendarEvent(selection.lab, courseName));
   }
 
   return calendarEvents;
