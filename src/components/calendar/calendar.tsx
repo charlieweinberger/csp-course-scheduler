@@ -1,13 +1,13 @@
-import type { CalendarEvent } from "../../types";
 import getEvents from "./getEvents";
 
 import { Calendar, momentLocalizer, DateLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-moment.updateLocale("en", { week: { dow: 1 } });
+import type { CalendarEvent } from "../../types";
+import "./calendar.css";
 
-// TODO remove space in calendar for all day events
+moment.updateLocale("en", { week: { dow: 1 } });
 
 export default function CalendarWrapper({
   courseNames,
