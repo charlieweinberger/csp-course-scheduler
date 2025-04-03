@@ -1,16 +1,11 @@
 // import { mockData } from "./mockData";
 import { fetchData } from "./fetchData";
-import type { CourseEvent, CalendarEvent } from "../../types";
+import type { color, colorMap, CourseEvent, CalendarEvent } from "../../types";
 
-// TODO replace this with a random color generator
-const colorMap: { [name: string]: string } = {
-  "COMPSCI 161": "blue",
-  "COMPSCI 178": "red",
-  "I&C SCI 139W": "green",
-  "I&C SCI 51": "purple",
-};
+const colors: color[] = ["red", "orange", "yellow", "green", "blue", "purple"];
+const usedColors: colorMap = {};
 
-function getDateFromTime(day: string, timeOfDay: number): Date {
+function getDate(day: string, timeOfDay: number): Date {
   // Set monday to be starting day of the week
   const now = new Date();
   const currentDay = now.getDay();
@@ -38,36 +33,26 @@ function getDateFromTime(day: string, timeOfDay: number): Date {
   return targetDate;
 }
 
-// Helper function to check if two events overlap in time
 function eventsOverlap(event1: CourseEvent, event2: CourseEvent): boolean {
-  // Check if the events share any days
-  const sharedDays = event1.days.filter((day) => event2.days.includes(day));
-  if (sharedDays.length === 0) return false;
-
-  // Check if time ranges overlap on shared days
-  return !(
-    event1.endTime <= event2.startTime || event1.startTime >= event2.endTime
-  );
+  const daysOverlap = event1.days.some((day) => event2.days.includes(day));
+  if (!daysOverlap) return false;
+  return event1.startTime < event2.endTime && event2.startTime < event1.endTime;
 }
 
-// Helper function to check if a component section is compatible with the lecture section
-function isSectionCompatible(
-  lectureSection: string,
-  componentSection: string
-): boolean {
-  // If the component section is all numbers, it's compatible with any lecture
-  if (/^\d+$/.test(componentSection)) {
-    return true;
-  }
-
-  // Extract the main section letter from the lecture section
-  const mainSectionLetter = lectureSection.charAt(0);
-
-  // The component section should start with the same letter
-  return componentSection.startsWith(mainSectionLetter);
+function sectionsCompatible(lecSection: string, otherSection: string): boolean {
+  if (/^\d+$/.test(otherSection)) return true;
+  return otherSection.startsWith(lecSection.charAt(0));
 }
 
-// Convert CourseEvent to CalendarEvent
+function randomColor(courseName: string): string {
+  if (courseName in usedColors) return usedColors[courseName];
+  const possibleColors = colors.filter((color) => !(color in usedColors));
+  const randomIndex = Math.floor(Math.random() * possibleColors.length);
+  const randomColor = possibleColors[randomIndex];
+  usedColors[courseName] = randomColor;
+  return randomColor;
+}
+
 function convertToCalendarEvents(
   event: CourseEvent,
   courseName: string
@@ -75,9 +60,9 @@ function convertToCalendarEvents(
   return event.days.map((day) => ({
     id: event.code,
     title: `${event.code}: ${event.type} ${event.section}`,
-    start: getDateFromTime(day, event.startTime),
-    end: getDateFromTime(day, event.endTime),
-    color: colorMap[courseName],
+    start: getDate(day, event.startTime),
+    end: getDate(day, event.endTime),
+    color: randomColor(courseName),
   }));
 }
 
@@ -141,7 +126,7 @@ function solveCSP(courseNames: string[]) {
       if (!discussionAssigned) {
         // Filter discussions to only those matching the lecture section
         const compatibleDiscussions = discussions.filter((discussion) =>
-          isSectionCompatible(lecture.section, discussion.section)
+          sectionsCompatible(lecture.section, discussion.section)
         );
 
         if (compatibleDiscussions.length === 0) {
@@ -175,7 +160,7 @@ function solveCSP(courseNames: string[]) {
           if (!labAssigned) {
             // Filter labs to only those matching the lecture section
             const compatibleLabs = labs.filter((lab) =>
-              isSectionCompatible(lecture.section, lab.section)
+              sectionsCompatible(lecture.section, lab.section)
             );
 
             if (compatibleLabs.length === 0) {
@@ -249,7 +234,7 @@ function solveCSP(courseNames: string[]) {
         if (!labAssigned) {
           // Filter labs to only those matching the lecture section
           const compatibleLabs = labs.filter((lab) =>
-            isSectionCompatible(lecture.section, lab.section)
+            sectionsCompatible(lecture.section, lab.section)
           );
 
           if (compatibleLabs.length === 0) {

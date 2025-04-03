@@ -1,13 +1,13 @@
 import { typeOption, sectionOption, dayOption, TimeOption } from "../../types";
 
-// TODO replace this with anteater API
-
-export function fetchData(courseName: string) { // TODO make this async
+// TODO make this function async
+export function fetchData(courseName: string) {
   console.log(`Fetching data for course: ${courseName}`);
 
-  // const [ department, courseNumber ] = courseName.split(/ (?!.* )/);
+  // // TODO replcae ampersands in department with "%26"
+  // const [ courseDepartment, courseNumber ] = courseName.split(/ (?!.* )/);
   // try {
-  //   const response = await fetch(`https://anteaterapi.com/v2/rest/websoc?year=2025&quarter=Spring&department=${department}&courseNumber=${courseNumber}`);
+  //   const response = await fetch(`https://anteaterapi.com/v2/rest/websoc?year=2025&quarter=Spring&department=${courseDepartment}&courseNumber=${courseNumber}`);
   //   if (!response.ok) {
   //       throw new Error(`HTTP error! Status: ${response.status}`);
   //   }
@@ -18,6 +18,7 @@ export function fetchData(courseName: string) { // TODO make this async
   //     return null;
   // }
 
+  // TODO replace this with anteater API
   return [
     [
       {
