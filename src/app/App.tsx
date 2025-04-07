@@ -13,6 +13,7 @@ export default function App() {
     const department = data.get("department");
     const courseNumber = data.get("courseNumber");
     const newCourseName = `${department} ${courseNumber}`;
+    if (courseNames.includes(newCourseName)) return;
     console.log(`Adding course: ${newCourseName}`);
     setCourseNames([...courseNames, newCourseName]);
   };

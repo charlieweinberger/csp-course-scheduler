@@ -10,3 +10,15 @@
 .rbc-time-content {
   border-top: 1px solid #DDD;
 }
+
+.rbc-day-slot.rbc-today {
+  background-color: inherit !important;
+}
+
+.rbc-header.rbc-today {
+  background-color: inherit !important;
+}
+
+.rbc-current-time-indicator {
+  display: none !important;
+}

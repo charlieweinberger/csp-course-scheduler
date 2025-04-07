@@ -1,14 +1,14 @@
 // import { mockData } from "./mockData";
 import { fetchData } from "./fetchData";
 import type {
-  color,
+  Color,
   CourseEvent,
   CalendarEvent,
   CSPSelections,
 } from "../../types";
 
-const colors: color[] = ["red", "orange", "yellow", "green", "blue", "purple"];
-const usedColors: { [courseName: string]: color } = {};
+const colors: Color[] = ["red", "orange", "yellow", "green", "blue", "purple"];
+const usedColors: { [courseName: string]: Color } = {};
 
 function getDate(day: string, timeOfDay: number): Date {
   // Set monday to be starting day of the week
@@ -50,6 +50,7 @@ function sectionsCompatible(lecSection: string, otherSection: string): boolean {
 }
 
 function randomColor(courseName: string): string {
+  // TODO fix this function, it's not preventing repeats
   if (courseName in usedColors) return usedColors[courseName];
   const possibleColors = colors.filter((color) => !(color in usedColors));
   const randomIndex = Math.floor(Math.random() * possibleColors.length);
@@ -85,8 +86,15 @@ function backtrack(
   }
 
   const courseName = courseNames[courseIndex];
-  // const courseData = mockData[courseName];
-  const courseData = fetchData(courseName); // TODO make this async
+  // TODO store course data in a cache to avoid fetching it multiple times
+  const courseData: CourseEvent[][] = fetchData(courseName);
+  // TODO fix error handling throughout the code (course doesn't exist, schedule isn't possible, etc.)
+  if (courseData.length === 0) {
+    console.error(`No data found for course: ${courseName}`);
+    return false;
+  }
+
+  console.log(courseData);
 
   // Try to assign a lecture (must have one)
   const lectures = courseData[0];
