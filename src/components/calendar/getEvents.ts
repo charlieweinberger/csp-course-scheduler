@@ -86,7 +86,6 @@ function backtrack(
   }
 
   const courseName = courseNames[courseIndex];
-  // TODO store course data in a cache to avoid fetching it multiple times
   const courseData: CourseEvent[][] = fetchData(courseName);
   // TODO fix error handling throughout the code (course doesn't exist, schedule isn't possible, etc.)
   if (courseData.length === 0) {

@@ -49,6 +49,8 @@ export function fetchData(courseName: string): CourseEvent[][] {
   const encodedDepartment = courseDepartment.replace(/&/g, "%26");
   const url = `https://anteaterapi.com/v2/rest/websoc?year=2025&quarter=Spring&department=${encodedDepartment}&courseNumber=${courseNumber}`;
 
+  // TODO get anteater api API key
+
   try {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, false);

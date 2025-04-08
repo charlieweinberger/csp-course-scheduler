@@ -1,3 +1,8 @@
+// TODO replace this UI with v0 UI
+// TODO as soon as a user adds a course, fetch the data from Anteater API, so that when the scheduel is created, the data is already there
+// TODO store course data locally to avoid fetching it multiple times
+// TODO figure out the logic between showing all course data and showing only the scheduled courses
+
 import { useState } from "react";
 import CalendarWrapper from "../components/calendar/calendar";
 
@@ -6,8 +11,6 @@ import { Button } from "../components/ui/button";
 
 export default function App() {
   const [courseNames, setCourseNames] = useState<string[]>([]);
-
-  // TODO display current course list to user
 
   const updateCourseNames = (data: FormData) => {
     const department = data.get("department");
