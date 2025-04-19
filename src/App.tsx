@@ -6,6 +6,7 @@ import { CourseSelection } from "@/components/CourseSelection";
 import { Preferences } from "@/components/Preferences";
 import { Schedule } from "@/components/Schedule";
 
+// TODO Make sure course sections are in the same format as the Anteater API
 const mockCourseSections: CourseSections = {
   "COMPSCI-161": {
     title: "Software Design",
@@ -140,6 +141,8 @@ const mockCourseSections: CourseSections = {
     ]
   }
 };
+
+// TODO go through App.tsx, types.d.ts, fetchData.ts, and getEvents.ts. Manually review every line of code, and modify code to match what should work in my mind. Within fetchData.ts and getEvents.ts, connect backend to the current code (which is all frontend, from v0).
 
 export default function Home() {
   const [courses, setCourses] = useState<Course[]>([]);
