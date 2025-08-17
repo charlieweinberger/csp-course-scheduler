@@ -4,10 +4,10 @@
 // TODO figure out the logic between showing all course data and showing only the scheduled courses
 
 import { useState } from "react";
-import CalendarWrapper from "../components/calendar/calendar";
+import CalendarWrapper from "@/components/calendar";
 
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function App() {
   const [courseNames, setCourseNames] = useState<string[]>([]);

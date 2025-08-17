@@ -1,10 +1,10 @@
-import getEvents from "./getEvents";
+import getEvents from "../lib/getEvents";
 
 import { Calendar, momentLocalizer, DateLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-import type { CalendarEvent } from "../../types";
+import type { CalendarEvent } from "@/types";
 import "./calendar.css";
 
 moment.updateLocale("en", { week: { dow: 1 } });

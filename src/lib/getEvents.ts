@@ -5,7 +5,7 @@ import type {
   CourseEvent,
   CalendarEvent,
   CSPSelections,
-} from "../../types";
+} from "@/types";
 
 const colors: Color[] = ["red", "orange", "yellow", "green", "blue", "purple"];
 const usedColors: { [courseName: string]: Color } = {};

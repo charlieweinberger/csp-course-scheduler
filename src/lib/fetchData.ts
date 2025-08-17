@@ -4,7 +4,7 @@ import type {
   TimeOption,
   ApiTime,
   ApiSection,
-} from "../../types";
+} from "@/types";
 
 function convertToDayOptions(days: string | undefined): DayOption[] {
   if (!days) return [];
