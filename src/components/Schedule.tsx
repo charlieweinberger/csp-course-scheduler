@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar, List, BarChart } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Download, Calendar, List, BarChart } from "lucide-react";
 
 export function Schedule({
   schedule,
@@ -196,86 +197,88 @@ export function Schedule({
                   {days.map((day) => (
                     <div key={day} className="relative border-l min-h-[800px]">
                       {displayCourses
-                      .filter((course) => {
-                        // If highlighting a course, only show that course
-                        if (
-                        highlightedCourse &&
-                        !course.id.includes(highlightedCourse)
-                        ) {
-                        return false;
-                        }
+                        .filter((course) => {
+                          // If highlighting a course, only show that course
+                          if (
+                            highlightedCourse &&
+                            !course.id.includes(highlightedCourse)
+                          ) {
+                            return false;
+                          }
 
-                        // Convert day abbreviations to full day names for filtering
-                        const dayMap: Record<string, string> = {
-                        M: "Monday",
-                        T: "Tuesday",
-                        W: "Wednesday",
-                        Th: "Thursday",
-                        F: "Friday",
-                        };
-                        return course.days.some(
-                        (d: string) => dayMap[d] === day
-                        );
-                      })
-                      .map((course, i: number) => {
-                        // Parse start and end times
-                        const [startHour, startMin] = course.startTime
-                        .split(":")
-                        .map(Number);
-                        const [endHour, endMin] = course.endTime
-                        .split(":")
-                        .map(Number);
+                          // Convert day abbreviations to full day names for filtering
+                          const dayMap: Record<string, string> = {
+                            M: "Monday",
+                            T: "Tuesday",
+                            W: "Wednesday",
+                            Th: "Thursday",
+                            F: "Friday",
+                          };
+                          return course.days.some(
+                            (d: string) => dayMap[d] === day
+                          );
+                        })
+                        .map((course, i: number) => {
+                          // Parse start and end times
+                          const [startHour, startMin] = course.startTime
+                            .split(":")
+                            .map(Number);
+                          const [endHour, endMin] = course.endTime
+                            .split(":")
+                            .map(Number);
 
-                        // Calculate position and height
-                        const top: number =
-                        (startHour - 8) * 64 + (startMin / 60) * 64;
-                        const height: number =
-                        (endHour - startHour) * 64 +
-                        ((endMin - startMin) / 60) * 64;
+                          // Calculate position and height
+                          const top: number =
+                            (startHour - 8) * 64 + (startMin / 60) * 64;
+                          const height: number =
+                            (endHour - startHour) * 64 +
+                            ((endMin - startMin) / 60) * 64;
 
-                        const colorClass: string = getCourseColor(course.department);
+                          const colorClass: string = getCourseColor(
+                            course.department
+                          );
 
-                        // Add opacity for non-highlighted courses when in highlight mode
-                        const opacityClass: string =
-                        highlightedCourse &&
-                        !course.id.includes(highlightedCourse)
-                          ? "opacity-40"
-                          : "";
+                          // Add opacity for non-highlighted courses when in highlight mode
+                          const opacityClass: string =
+                            highlightedCourse &&
+                            !course.id.includes(highlightedCourse)
+                              ? "opacity-40"
+                              : "";
 
-                        // Add section code and type if available
-                        const sectionInfo: string =
-                        course.type && course.sectionCode
-                          ? ` (${course.type} ${course.sectionCode})`
-                          : course.sectionCode
-                          ? ` (${course.sectionCode})`
-                          : "";
+                          // Add section code and type if available
+                          const sectionInfo: string =
+                            course.type && course.sectionCode
+                              ? ` (${course.type} ${course.sectionCode})`
+                              : course.sectionCode
+                              ? ` (${course.sectionCode})`
+                              : "";
 
-                        return (
-                        <div
-                          key={`${course.id}-${i}`}
-                          className={`absolute rounded-md border p-2 w-[95%] overflow-hidden ${colorClass} ${opacityClass} transition-opacity`}
-                          style={{
-                          top: `${top}px`,
-                          height: `${height}px`,
-                          left: "2.5%",
-                          zIndex: course.isHighlighted ? 10 : 1,
-                          }}
-                        >
-                          <div className="text-xs font-bold">
-                          {course.department} {course.number}
-                          {sectionInfo}
-                          </div>
-                          <div className="text-xs truncate">
-                          {course.location}
-                          </div>
-                          {course.instructor && (
-                          <div className="text-xs truncate">
-                            {course.instructor}
-                          </div>
-                          )}
-                        </div>
-                        );
-                      })}
+                          return (
+                            <div
+                              key={`${course.id}-${i}`}
+                              className={`absolute rounded-md border p-2 w-[95%] overflow-hidden ${colorClass} ${opacityClass} transition-opacity`}
+                              style={{
+                                top: `${top}px`,
+                                height: `${height}px`,
+                                left: "2.5%",
+                                zIndex: course.isHighlighted ? 10 : 1,
+                              }}
+                            >
+                              <div className="text-xs font-bold">
+                                {course.department} {course.number}
+                                {sectionInfo}
+                              </div>
+                              <div className="text-xs truncate">
+                                {course.location}
+                              </div>
+                              {course.instructor && (
+                                <div className="text-xs truncate">
+                                  {course.instructor}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                     </div>
                   ))}
                 </div>
@@ -392,31 +395,31 @@ export function Schedule({
                 // Show scheduled courses
                 schedule.courses.map((course, i: number) => (
                   <div key={i} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                    <h3 className="font-bold">
-                      {course.department} {course.number}
-                    </h3>
-                    <p className="text-sm text-gray-500">{course.title}</p>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-bold">
+                          {course.department} {course.number}
+                        </h3>
+                        <p className="text-sm text-gray-500">{course.title}</p>
+                      </div>
+                      <Badge>
+                        {course.days.join(", ")} {course.startTime}-
+                        {course.endTime}
+                      </Badge>
                     </div>
-                    <Badge>
-                    {course.days.join(", ")} {course.startTime}-
-                    {course.endTime}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                    <span className="font-medium">Location:</span>{" "}
-                    {course.location}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium">Location:</span>{" "}
+                        {course.location}
+                      </div>
+                      <div>
+                        <span className="font-medium">Instructor:</span>{" "}
+                        {course.instructor}
+                      </div>
                     </div>
-                    <div>
-                    <span className="font-medium">Instructor:</span>{" "}
-                    {course.instructor}
-                    </div>
-                  </div>
                   </div>
                 ))
-                ) : (
+              ) : (
                 <div className="text-center p-8 border border-dashed rounded-md">
                   <p className="text-gray-500">
                     No courses to display. Add courses and click the eye icon to
